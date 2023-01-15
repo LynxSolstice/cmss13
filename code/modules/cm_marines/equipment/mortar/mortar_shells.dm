@@ -48,10 +48,10 @@
 	desc = "An 80mm mortar shell, loaded with a Type B napalm charge. Perfect for long-range area denial."
 	icon_state = "mortar_ammo_inc"
 	var/radius = 5
-	var/flame_level = BURN_TIME_TIER_5 + 5 //Type B standard, 50 base + 5 from chemfire code.
+	var/flame_level = BURN_TIME_TIER_5 + 5 //Default fire, 50 base + 5 from chemfire code.
 	var/burn_level = BURN_LEVEL_TIER_2
 	var/flameshape = FLAMESHAPE_DEFAULT
-	var/fire_type = FIRE_VARIANT_TYPE_B //Armor Shredding Greenfire
+	var/fire_type = FIRE_VARIANT_DEFAULT //Orange fire
 
 /obj/item/mortar_shell/incendiary/detonate(var/turf/T)
 	explosion(T, 0, 2, 4, 7, explosion_cause_data = cause_data)
