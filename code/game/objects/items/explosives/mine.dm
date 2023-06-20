@@ -8,7 +8,7 @@
 	icon_state = "m20"
 	force = 5
 	w_class = SIZE_SMALL
-	//layer = MOB_LAYER - 0.1 //You can't just randomly hide claymores under boxes. Booby-trapping bodies is fine though
+	layer = MOB_LAYER - 0.1 //You can't just randomly hide claymores under boxes. Booby-trapping bodies is fine though
 	throwforce = 5
 	throw_range = 6
 	throw_speed = SPEED_VERY_FAST
@@ -95,8 +95,7 @@
 	cause_data = create_cause_data(initial(name), user)
 	anchored = TRUE
 	playsound(loc, 'sound/weapons/mine_armed.ogg', 25, 1)
-	if(user)
-		user.drop_inv_item_on_ground(src)
+	user.drop_inv_item_on_ground(src)
 	setDir(user ? user.dir : dir) //The direction it is planted in is the direction the user faces at that time
 	activate_sensors()
 	update_icon()
