@@ -62,7 +62,8 @@
 	QDEL_NULL_LIST(embedded_items)
 	QDEL_LIST_ASSOC_VAL(internal_organs_by_name)
 	QDEL_NULL_LIST(limbs)
-	remove_from_all_mob_huds()
+	if(hud_used)
+		QDEL_NULL(hud_used)
 	. = ..()
 
 	overlays_standing = null
@@ -89,7 +90,6 @@
 	assigned_squad = null
 	selected_ability = null
 	remembered_dropped_objects = null
-	active_transfusions = null
 
 /mob/living/carbon/human/get_status_tab_items()
 	. = ..()
