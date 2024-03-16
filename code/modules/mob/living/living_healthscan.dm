@@ -76,7 +76,7 @@ GLOBAL_LIST_INIT(known_implants, subtypesof(/obj/item/implant))
 
 	var/total_mob_damage = target_mob.getBruteLoss() + target_mob.getFireLoss() + target_mob.getToxLoss() + target_mob.getCloneLoss()
 
-	// Fake death will make the scanner think they died of oxygen damage, thus it returns enough damage to kill minus already recieved damage.
+	// Fake death will make the scanner think they died of oxygen damage, thus it returns enough damage to kill minus already received damage.
 	return round(POSITIVE(200 - total_mob_damage))
 
 /datum/health_scan/proc/get_health_value(mob/living/target_mob)
@@ -101,7 +101,7 @@ GLOBAL_LIST_INIT(known_implants, subtypesof(/obj/item/implant))
 		"hugged" = (locate(/obj/item/alien_embryo) in target_mob),
 	)
 
-	var/internal_bleeding = FALSE
+	var/internal_bleeding = FALSE //do they have internal bleeding anywhere
 
 	if(!isnull(data_detail_level))
 		detail_level = data_detail_level
@@ -158,11 +158,10 @@ GLOBAL_LIST_INIT(known_implants, subtypesof(/obj/item/implant))
 		var/core_fracture_detected = FALSE
 		var/unknown_implants = 0
 		for(var/obj/limb/limb in human_target_mob.limbs)
-			var/internal_bleeding_check = FALSE
+			var/internal_bleeding_check = FALSE //do they have internal bleeding in this limb
 			for(var/datum/effects/bleeding/internal/ib in limb.bleeding_effects_list)
 				internal_bleeding = TRUE
-				if(detail_level >= DETAIL_LEVEL_BODYSCAN)
-					internal_bleeding_check = TRUE
+				internal_bleeding_check = TRUE
 				break
 			if(limb.hidden)
 				unknown_implants++
@@ -179,7 +178,7 @@ GLOBAL_LIST_INIT(known_implants, subtypesof(/obj/item/implant))
 				bleeding_check = TRUE
 				break
 
-			if((!limb.brute_dam && !limb.burn_dam && !(limb.status & LIMB_DESTROYED)) && !bleeding_check && !internal_bleeding_check && !(implant && detail_level >= DETAIL_LEVEL_BODYSCAN ) && !(limb.status & LIMB_UNCALIBRATED_PROSTHETIC) && !(limb.status & LIMB_BROKEN) && !(limb.status & LIMB_SPLINTED) && !(limb.status & LIMB_SPLINTED_INDESTRUCTIBLE))
+			if((!limb.brute_dam && !limb.burn_dam && !(limb.status & LIMB_DESTROYED)) && !bleeding_check && !internal_bleeding_check && !(implant && detail_level >= DETAIL_LEVEL_BODYSCAN ) && !(limb.status & LIMB_UNCALIBRATED_PROSTHETIC) && !(limb.status & LIMB_BROKEN) && !(limb.status & LIMB_SPLINTED) && !(limb.status & LIMB_SPLINTED_INDESTRUCTIBLE) && !(limb.get_incision_depth()))
 				continue
 			var/list/core_body_parts = list("head", "chest", "groin")
 			var/list/current_list = list(
@@ -191,7 +190,6 @@ GLOBAL_LIST_INIT(known_implants, subtypesof(/obj/item/implant))
 				"missing" = (limb.status & LIMB_DESTROYED),
 				"limb_status" = null,
 				"bleeding" = bleeding_check,
-				"open_incision" = limb.get_incision_depth(),
 				"implant" = implant,
 				"internal_bleeding" = internal_bleeding_check
 			)
@@ -248,6 +246,24 @@ GLOBAL_LIST_INIT(known_implants, subtypesof(/obj/item/implant))
 				limb_type = "Synthskin"
 			if(limb_type)
 				current_list["limb_type"] = limb_type
+
+			//checking for open incisions, but since eyes and mouths incisions are "head incisions" but not "head surgeries" gotta do some snowflake
+			if(limb.name == "head")
+				if(human_target_mob.active_surgeries["head"])
+					current_list["open_incision"] = TRUE
+
+				var/zone
+				if(human_target_mob.active_surgeries["eyes"])
+					zone = "eyes"
+				if(human_target_mob.active_surgeries["mouth"])
+					if(zone)
+						zone = "eyes and mouth"
+					else
+						zone = "mouth"
+				current_list["open_zone_incision"] = capitalize(zone)
+
+			else
+				current_list["open_incision"] = limb.get_incision_depth()
 
 			limb_data_lists["[limb.name]"] = current_list
 
@@ -442,7 +458,7 @@ GLOBAL_LIST_INIT(known_implants, subtypesof(/obj/item/implant))
 
 	data["ssd"] = null //clear the data in case we have an old input from a previous scan
 	if(target_mob.getBrainLoss() >= 100 || !target_mob.has_brain())
-		data["ssd"] = "Subject is brain-dead."
+		data["ssd"] = "Subject has taken extreme amounts of brain damage."
 	else if(target_mob.has_brain() && target_mob.stat != DEAD && ishuman(target_mob))
 		if(!target_mob.key)
 			data["ssd"] = "No soul detected." // they ghosted
@@ -587,7 +603,7 @@ GLOBAL_LIST_INIT(known_implants, subtypesof(/obj/item/implant))
 		if(!D.hidden[SCANNER])
 			dat += "\t<span class='scannerb'> *Warning: [D.form] Detected</span><span class='scanner'>\nName: [D.name].\nType: [D.spread].\nStage: [D.stage]/[D.max_stages].\nPossible Cure: [D.cure]</span>\n"
 	if (src.getBrainLoss() >= 100 || !src.has_brain())
-		dat += "\t<span class='scanner'> *Subject is <b>brain dead</b></span>.\n"
+		dat += "\t<span class='scanner'> *Subject has taken extreme amounts of <b>brain damage</b></span>.\n"
 
 	if(src.has_brain() && src.stat != DEAD && ishuman(src))
 		if(!src.key)

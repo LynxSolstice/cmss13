@@ -35,7 +35,7 @@
 #define MOB_HUD_XENO_INFECTION 6
 #define MOB_HUD_XENO_STATUS 7
 #define MOB_HUD_XENO_HOSTILE 8
-#define MOB_HUD_FACTION_USCM 9
+#define MOB_HUD_FACTION_MARINE 9
 #define MOB_HUD_FACTION_OBSERVER 10
 #define MOB_HUD_FACTION_UPP 11
 #define MOB_HUD_FACTION_WY 12
@@ -63,3 +63,8 @@
 //for tracking the queen/hivecore on xeno locator huds
 #define TRACKER_QUEEN "Queen"
 #define TRACKER_HIVE "Hive Core"
+#define TRACKER_LEADER "Leader"
+#define TRACKER_TUNNEL "Tunnel"
+
+//These are used to manage the same HUD having multiple sources
+#define HUD_SOURCE_ADMIN "admin"

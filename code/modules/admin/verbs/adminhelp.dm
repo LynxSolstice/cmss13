@@ -469,6 +469,14 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 /datum/admin_help/proc/Close(key_name = key_name_admin(usr), silent = FALSE)
 	if(state != AHELP_ACTIVE)
 		return
+
+	if(marked_admin != usr.ckey)
+		if(marked_admin)
+			to_chat(usr, SPAN_WARNING("This ticket is currently marked by [marked_admin]. Please override their mark to interact with this ticket!"))
+		else
+			to_chat(usr, SPAN_WARNING("This ticket is not currently marked. Please mark it first to interact with this ticket!"))
+		return
+
 	RemoveActive()
 	state = AHELP_CLOSED
 	GLOB.ahelp_tickets.ListInsert(src)
@@ -483,6 +491,14 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 /datum/admin_help/proc/Resolve(key_name = key_name_admin(usr), silent = FALSE)
 	if(state != AHELP_ACTIVE)
 		return
+
+	if(marked_admin != usr.ckey)
+		if(marked_admin)
+			to_chat(usr, SPAN_WARNING("This ticket is currently marked by [marked_admin]. Please override their mark to interact with this ticket!"))
+		else
+			to_chat(usr, SPAN_WARNING("This ticket is not currently marked. Please mark it first to interact with this ticket!"))
+		return
+
 	RemoveActive()
 	state = AHELP_RESOLVED
 	GLOB.ahelp_tickets.ListInsert(src)
@@ -499,6 +515,10 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 
 /datum/admin_help/proc/defer_to_mentors()
 	if(state != AHELP_ACTIVE || !initial_message)
+		return
+
+	if(marked_admin && marked_admin != usr.ckey)
+		to_chat(usr, SPAN_WARNING("This ticket is currently marked by [marked_admin]. Please override their mark to interact with this ticket!"))
 		return
 
 	if(!initiator.current_mhelp)
@@ -519,20 +539,21 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 
 	AddInteraction("Deferred to Mentors by [key_name_admin(usr)].", player_message = "Deferred to Mentors.")
 	to_chat(initiator, SPAN_ADMINHELP("Your ticket has been deferred to Mentors."))
+	log_admin_private("Ticket [TicketHref("#[id]")] deferred to mentors by [usr.key].")
 	log_ahelp(id, "Defer", "Deferred to mentors by [usr.key]", null,  usr.ckey)
 	Close(silent = TRUE)
 
 /datum/admin_help/proc/mark_ticket()
 	if(marked_admin)
-		if(marked_admin == usr.key)
+		if(marked_admin == usr.ckey)
 			unmark_ticket()
 			return
 		to_chat(usr, SPAN_WARNING("This ticket has already been marked by [marked_admin]."))
 		var/unmark_option = tgui_alert(usr, "This message has been marked by [marked_admin]. Do you want to override?", "Marked Ticket", list("Overwrite Mark", "Unmark", "Cancel"))
-		if(unmark_option == "Cancel")
-			return
 		if(unmark_option == "Unmark")
 			unmark_ticket()
+			return
+		if(unmark_option != "Overwrite Mark")
 			return
 
 	var/key_name = key_name_admin(usr)
@@ -542,7 +563,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	message_admins(msg)
 	log_admin_private(msg)
 	log_ahelp(id, "Marked", "Marked by [usr.key]", sender = usr.ckey)
-	marked_admin = usr.key
+	marked_admin = usr.ckey
 
 /datum/admin_help/proc/unmark_ticket()
 	var/key_name = key_name_admin(usr)
@@ -556,6 +577,13 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 //Close and return ahelp verb, use if ticket is incoherent
 /datum/admin_help/proc/Reject(key_name = key_name_admin(usr))
 	if(state != AHELP_ACTIVE)
+		return
+
+	if(marked_admin != usr.ckey)
+		if(marked_admin)
+			to_chat(usr, SPAN_WARNING("This ticket is currently marked by [marked_admin]. Please override their mark to interact with this ticket!"))
+		else
+			to_chat(usr, SPAN_WARNING("This ticket is not currently marked. Please mark it first to interact with this ticket!"))
 		return
 
 	if(initiator)
@@ -579,6 +607,13 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	var/key_name = key_name_admin(usr)
 	if(state != AHELP_ACTIVE)
 		to_chat(usr, SPAN_WARNING("This ticket is already closed!"))
+		return
+
+	if(marked_admin != usr.ckey)
+		if(marked_admin)
+			to_chat(usr, SPAN_WARNING("This ticket is currently marked by [marked_admin]. Please override their mark to interact with this ticket!"))
+		else
+			to_chat(usr, SPAN_WARNING("This ticket is not currently marked. Please mark it first to interact with this ticket!"))
 		return
 
 	var/chosen = tgui_input_list(usr, "Which auto response do you wish to send?", "AutoReply", GLOB.adminreplies)
@@ -752,6 +787,8 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 //
 
 /client/proc/giveadminhelpverb()
+	if(!src)
+		return
 	add_verb(src, /client/verb/adminhelp)
 	deltimer(adminhelptimerid)
 	adminhelptimerid = 0
