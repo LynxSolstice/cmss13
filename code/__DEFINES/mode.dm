@@ -57,7 +57,7 @@
 #define MODE_BASIC_RT (1<<11)
 #define MODE_RANDOM_HIVE (1<<12)// Makes Join-as-Xeno choose a hive to join as burrowed larva at random rather than at user's input..
 #define MODE_THUNDERSTORM (1<<13)// Enables thunderstorm effects on maps that are compatible with it. (Lit exterior tiles, rain effects)
-#define MODE_FACTION_CLASH (1<<14)// Disables scopes, sniper sentries, OBs, shooting corpses, dragging enemy corpses, stripping enemy corpses
+#define MODE_FACTION_CLASH (1<<14)// Disables scopes, sniper sentries, OBs, shooting corpses, dragging enemy corpses, stripping enemy corpses, increase armor bullet/bomb/internal damage protection
 
 // Gamemode Toggleable Flags
 #define MODE_NO_SNIPER_SENTRY (1<<0) /// Upgrade kits will no longer allow you to select long-range upgrades
@@ -73,6 +73,9 @@
 #define MODE_DISPOSABLE_MOBS (1<<10) // Toggles if mobs fit in disposals or not. Off by default.
 #define MODE_BYPASS_JOE (1<<11) // Toggles if ghosts can bypass Working Joe spawn limitations, does NOT bypass WL requirement. Off by default.
 #define MODE_DISABLE_JOE_RESPAWN (1<<12) // Toggles if ghosts can respawn as Working Joes after dying as one when 15 minutes have passed. Off by default
+#define MODE_INDESTRUCTIBLE_SPLINTS (1<<13) //Toggle is splints are to become nanosplints
+#define MODE_NO_INTERNAL_BLEEDING (1<<14) // Toggles all internal bleeding behavior to cause normal bleeding instead
+
 
 #define ROUNDSTATUS_FOG_DOWN 1
 #define ROUNDSTATUS_PODDOORS_OPEN 2
@@ -295,6 +298,7 @@ DEFINE_BITFIELD(whitelist_status, list(
 #define FACTION_LIST_MARINE_WY list(FACTION_MARINE, FACTION_PMC, FACTION_WY_DEATHSQUAD, FACTION_WY)
 #define FACTION_LIST_MARINE_UPP list(FACTION_MARINE, FACTION_UPP)
 #define FACTION_LIST_MARINE_TWE list(FACTION_MARINE, FACTION_TWE)
+#define FACTION_LIST_YAUTJA list(FACTION_YAUTJA)
 
 // Xenomorphs
 #define FACTION_PREDALIEN "Predalien"

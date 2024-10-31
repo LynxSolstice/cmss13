@@ -654,11 +654,19 @@
 	if(!spacecheck(X, T, structure_template))
 		return FALSE
 
+	if((choice == XENO_STRUCTURE_EGGMORPH) && locate(/obj/structure/flora/grass/tallgrass) in T)
+		to_chat(X, SPAN_WARNING("The tallgrass is preventing us from building the egg morpher!"))
+		qdel(structure_template)
+		return FALSE
+
 	if(!do_after(X, XENO_STRUCTURE_BUILD_TIME, INTERRUPT_NO_NEEDHAND|BEHAVIOR_IMMOBILE, BUSY_ICON_BUILD))
 		return FALSE
 
 	if(!spacecheck(X, T, structure_template)) //doublechecking
 		return FALSE
+
+	if(choice == XENO_STRUCTURE_CORE && AR.unoviable_timer)
+		to_chat(X, SPAN_WARNING("This area does not feel right for you to build this in."))
 
 	if((choice == XENO_STRUCTURE_CORE) && isqueen(X) && X.hive.has_structure(XENO_STRUCTURE_CORE))
 		if(X.hive.hive_location.hardcore || world.time > XENOMORPH_PRE_SETUP_CUTOFF)
@@ -926,7 +934,7 @@
 		return FALSE
 
 	var/distance = get_dist(stabbing_xeno, targetted_atom)
-	if(distance > 2)
+	if(distance > stab_range)
 		return FALSE
 
 	var/list/turf/path = get_line(stabbing_xeno, targetted_atom, include_start_atom = FALSE)
@@ -1019,13 +1027,12 @@
 	target.attack_log += text("\[[time_stamp()]\] <font color='orange'>was tailstabbed by [key_name(stabbing_xeno)]</font>")
 	stabbing_xeno.attack_log += text("\[[time_stamp()]\] <font color='red'>tailstabbed [key_name(target)]</font>")
 
-	stabbing_xeno.setDir(stab_direction)
-	stabbing_xeno.emote("tail")
-
-	/// Ditto.
-	var/new_dir = stabbing_xeno.dir
-
-	addtimer(CALLBACK(src, PROC_REF(reset_direction), stabbing_xeno, last_dir, new_dir), 0.5 SECONDS)
+	if(last_dir != stab_direction)
+		stabbing_xeno.setDir(stab_direction)
+		stabbing_xeno.emote("tail")
+		/// Ditto.
+		var/new_dir = stabbing_xeno.dir
+		addtimer(CALLBACK(src, PROC_REF(reset_direction), stabbing_xeno, last_dir, new_dir), 0.5 SECONDS)
 
 	stabbing_xeno.animation_attack_on(target)
 	stabbing_xeno.flick_attack_overlay(target, stab_overlay)
@@ -1038,7 +1045,10 @@
 		damage = stabbing_xeno.behavior_delegate.melee_attack_modify_damage(damage, target)
 
 	target.apply_armoured_damage(get_xeno_damage_slash(target, damage), ARMOR_MELEE, BRUTE, limb ? limb.name : "chest")
-	target.apply_effect(3, DAZE)
+	if(stabbing_xeno.mob_size >= MOB_SIZE_BIG)
+		target.apply_effect(3, DAZE)
+	else if(stabbing_xeno.mob_size == MOB_SIZE_XENO)
+		target.apply_effect(1, DAZE)
 	shake_camera(target, 2, 1)
 
 	target.handle_blood_splatter(get_dir(owner.loc, target.loc))
